@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Select Contest</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #ff4e50, #f9d423);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .card {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      backdrop-filter: blur(8px);
+      animation: slideUp 0.8s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    label, select, button {
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="card text-dark">
+    <h3 class="mb-4 text-center">🎯 Choose a Contest</h3>
+    <form method="post" action="/top3">
+      <div class="mb-3">
+        <label for="slug" class="form-label">Available Contests</label>
+        <select name="slug" class="form-select" required>
+          {% for c in contests %}
+            <option value="{{ c.slug }}">{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <input type="hidden" name="email" value="{{ email }}">
+      <input type="hidden" name="password" value="{{ password }}">
+      <button type="submit" class="btn btn-dark w-100 mt-3">🚀 Download Leaderboard</button>
+    </form>
+  </div>
+</body>
+</html>
