@@ -5,6 +5,8 @@ import math
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, after_this_request
 import pandas as pd
 import os
+import time
+import threading
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -46,11 +48,39 @@ def get_full_leaderboard(email, password, slug):
 
     return all_entries
 
+def format_time(seconds):
+    if seconds >= 3600:
+        hours = seconds // 3600
+        remaining_seconds = seconds % 3600
+        minutes = remaining_seconds // 60
+        remaining_seconds = remaining_seconds % 60
+        return f"{int(hours)} : {int(minutes)} : {int(remaining_seconds)}"
+    else:
+        minutes = seconds // 60
+        remaining_seconds = seconds % 60
+        return f"{int(minutes)} : {int(remaining_seconds)}"
+
 def save_to_excel(leaderboard, path):
     df = pd.DataFrame(leaderboard)
-    df = df[['rank', 'hacker', 'score']]
-    df.columns = ['Rank', 'Username', 'Score']
+    df['time_taken'] = df['time_taken'].apply(format_time)
+    df = df[['rank', 'hacker', 'score', 'time_taken']]
+    df.columns = ['Rank', 'Username', 'Score', 'Time Taken']
     df.to_excel(path, index=False)
+
+def cleanup_old_files(folder='static/downloads', age_limit=3600):  # age_limit in seconds (1 hour)
+    while True:
+        now = time.time()
+        for filename in os.listdir(folder):
+            path = os.path.join(folder, filename)
+            if os.path.isfile(path):
+                file_age = now - os.path.getmtime(path)
+                if file_age > age_limit:
+                    try:
+                        os.remove(path)
+                        app.logger.info(f"Deleted old file: {filename}")
+                    except Exception as e:
+                        app.logger.error(f"Error deleting file {filename}: {e}")
+        time.sleep(600)  # Run every 10 minutes
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -77,6 +107,10 @@ def top3():
 
     contest_name = secure_filename(contest['name'])
     leaderboard = get_full_leaderboard(email, password, slug)
+
+    for entry in leaderboard:
+        entry['time_taken'] = entry.get('time_taken', 0)
+        entry['formatted_time'] = format_time(entry['time_taken'])
 
     os.makedirs('static/downloads', exist_ok=True)
     file_name = f"{contest_name}.xlsx"
@@ -105,4 +139,6 @@ def download_file(filename):
     return redirect(url_for('login'))
 
 if __name__ == "__main__":
-    app.run()
+    os.makedirs('static/downloads', exist_ok=True)
+    threading.Thread(target=cleanup_old_files, daemon=True).start()
+    app.run(debug=True)
