@@ -9,3 +9,4 @@ numpy>=1.24.3
 matplotlib>=3.7.2
 webdriver-manager>=4.0.1
 setuptools>=68.0.0
+gunicorn
