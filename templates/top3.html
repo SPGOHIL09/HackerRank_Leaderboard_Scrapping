@@ -50,7 +50,7 @@
         {% if loop.index == 1 %}<span class="medal">🥇</span>{% elif loop.index == 2 %}<span class="medal">🥈</span>{% elif loop.index == 3 %}<span class="medal">🥉</span>{% endif %}
         {{ user.hacker }}
       </h4>
-      <p>Rank: <strong>{{ user.rank }}</strong> | Score: <strong>{{ user.score }}</strong> | <strong>{{ user.formatted_time }}</strong></p>
+      <p>Rank: <strong>{{ user.rank }}</strong> | Score: <strong>{{ user.score }}</strong> | Time: <strong>{{ user.formatted_time }}</strong></p>
     </div>
     {% endfor %}
     <a href="{{ url_for('download_file', filename=file_name) }}" class="btn btn-primary m-4">
